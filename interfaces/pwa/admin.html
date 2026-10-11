@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — 42 Campus Bike</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, sans-serif; background: #1a1a2e; color: #eee; padding: 20px; }
+    h1 { text-align: center; color: #00babc; margin-bottom: 5px; }
+    .sub { text-align: center; color: #777; margin-bottom: 25px; font-size: 14px; }
+    .row { display: flex; gap: 20px; max-width: 900px; margin: 0 auto 20px; flex-wrap: wrap; }
+    .box { background: #16213e; border-radius: 16px; padding: 20px; flex: 1; min-width: 280px; }
+    .box h2 { font-size: 16px; color: #00babc; margin-bottom: 15px; }
+    button { padding: 12px 20px; border: none; border-radius: 10px; font-size: 14px; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 8px; }
+    .btn-c { background: #00babc; color: #000; }
+    .btn-g { background: #2ecc71; color: #fff; }
+    .btn-r { background: #e74c3c; color: #fff; }
+    .btn-d { background: #2a2a3e; color: #aaa; }
+    button:disabled { opacity: 0.5; cursor: not-allowed; }
+    input { padding: 10px; border-radius: 8px; border: none; background: #2a2a3e; color: white; width: 100%; margin-bottom: 10px; font-size: 14px; }
+    .bike-list { max-width: 900px; margin: 0 auto; }
+    .bike-row { background: #16213e; border-radius: 12px; padding: 14px 18px; margin-bottom: 10px; display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
+    .bike-row .n { font-weight: bold; color: #00babc; min-width: 200px; font-size: 13px; }
+    .st { font-size: 12px; padding: 4px 10px; border-radius: 20px; }
+    .s-f { background: #00babc22; color: #00babc; }
+    .s-r { background: #e74c3c22; color: #e74c3c; }
+    .bike-row .u { font-size: 12px; color: #888; }
+    .bike-row .btns { margin-left: auto; }
+    .bike-row .btns button { width: auto; padding: 6px 14px; font-size: 12px; margin: 0; }
+    .msg { padding: 10px; border-radius: 8px; font-size: 13px; margin-top: 10px; }
+    .m-ok { background: #2ecc7122; color: #2ecc71; }
+    .m-err { background: #e74c3c22; color: #e74c3c; }
+    .m-info { background: #00babc22; color: #00babc; }
+    #qr-popup { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 99; align-items: center; justify-content: center; }
+    #qr-popup.show { display: flex; }
+    .qr-card { background: white; border-radius: 20px; padding: 30px; text-align: center; max-width: 350px; }
+    .qr-card h3 { color: #1a1a2e; margin-bottom: 5px; }
+    .qr-card p { color: #666; font-size: 12px; margin-bottom: 15px; word-break: break-all; }
+    .qr-card canvas { margin: 0 auto; }
+    @media print {
+      body > :not(#qr-popup) { display: none; }
+      #qr-popup { display: flex !important; position: static; background: white; }
+      .qr-card { box-shadow: none; border: 2px dashed #ccc; }
+      .qr-card button { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<h1>🔧 Admin Panel — 42 Campus Bike</h1>
+<p class="sub">Добавление велосипедов и печать QR-кодов</p>
+
+<div class="row">
+  <div class="box">
+    <h2>🔵 Добавить велосипед</h2>
+    <p style="font-size:12px;color:#888;margin-bottom:12px;">1. Включите ESP32<br>2. Подключитесь по BLE<br>3. Зарегистрируйте</p>
+    <button class="btn-c" id="btn-ble">🔵 Подключить по BLE</button>
+    <input id="new-id" type="text" placeholder="ID (авто из BLE)" readonly>
+    <button class="btn-g" id="btn-reg" disabled>✅ Зарегистрировать</button>
+    <button class="btn-d" id="btn-login">🔑 Войти (42 Intra)</button>
+    <div id="add-msg"></div>
+  </div>
+  <div class="box">
+    <h2>📋 Как это работает</h2>
+    <p style="font-size:13px;color:#888;line-height:1.6;">
+      • ESP32 сам генерирует ID из MAC<br>
+      • Одна прошивка на все платы<br>
+      • QR → распечатать → наклеить<br>
+      • Пользователь: QR → PWA → BLE → 🔓
+    </p>
+  </div>
+</div>
+
+<div class="bike-list" id="list"><p style="color:#888;">Загрузка...</p></div>
+
+<div id="qr-popup"><div class="qr-card" id="qr-card"></div></div>
+
+<script src="admin.js"></script>
+</body>
+</html>

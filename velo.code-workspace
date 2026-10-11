@@ -1,0 +1,21 @@
+{
+  "folders": [
+    {
+      "name": "Velo (root)",
+      "path": "."
+    },
+    {
+      "name": "ESP32 Firmware",
+      "path": "firmware/esp32_bike_lock"
+    }
+  ],
+  "settings": {
+    "typescript.tsc.autoDetect": "off",
+    "typescript.preferences.includePackageJsonAutoImports": "auto",
+    "files.exclude": {
+      "**/.pio": true,
+      "**/node_modules": true,
+      "**/dist": true
+    }
+  }
+}

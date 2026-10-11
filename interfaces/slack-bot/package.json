@@ -1,0 +1,20 @@
+{
+  "name": "velo-slack-bot",
+  "version": "1.0.0",
+  "description": "42 Campus Bike-Sharing — Slack Bot (Bolt API)",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "@slack/bolt": "^3.19.0",
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.43",
+    "tsx": "^4.15.0",
+    "typescript": "^5.4.5"
+  }
+}

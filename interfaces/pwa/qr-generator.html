@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QR-коды велосипедов — 42 Campus Bike</title>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Courier New', monospace; background: #1a1a2e; color: white; padding: 20px; }
+    h1 { text-align: center; margin-bottom: 10px; color: #00babc; }
+    p.sub { text-align: center; color: #888; margin-bottom: 30px; font-size: 14px; }
+    .controls { max-width: 600px; margin: 0 auto 30px; display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+    .controls input, .controls button { padding: 10px 15px; border-radius: 8px; border: none; font-size: 14px; }
+    .controls input { background: #2a2a3e; color: white; width: 250px; }
+    .controls button { background: #00babc; color: black; font-weight: bold; cursor: pointer; }
+    #grid { display: flex; flex-wrap: wrap; gap: 30px; justify-content: center; }
+    .card { background: #16213e; border-radius: 16px; padding: 20px; text-align: center; width: 220px; }
+    .card.free { border: 2px solid #00babc; }
+    .card.rented { border: 2px solid #ff6b6b; opacity: 0.5; }
+    .card h3 { font-size: 14px; color: #aaa; margin-bottom: 5px; }
+    .card .status { font-size: 13px; margin-bottom: 12px; }
+    .card .status .free { color: #00babc; font-weight: bold; }
+    .card .status .rented { color: #ff6b6b; font-weight: bold; }
+    .card .user { font-size: 12px; color: #888; margin-bottom: 8px; }
+    .card canvas { display: block; margin: 0 auto; }
+    .footer { text-align: center; margin-top: 30px; color: #555; font-size: 12px; }
+    .print-btn { text-align: center; margin: 30px 0; }
+    .print-btn button { padding: 15px 40px; font-size: 18px; background: #00babc; border: none; border-radius: 12px; cursor: pointer; font-weight: bold; }
+    @media print {
+      body { background: white; color: black; }
+      h1, p.sub, .controls, .footer, .print-btn { display: none; }
+      .card { border: 2px dashed #ccc; break-inside: avoid; }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🚲 QR-коды — 42 Campus Bike Sharing</h1>
+  <p class="sub">Распечатайте и наклейте QR-код на каждый велосипед</p>
+
+  <div class="controls">
+    <input id="pwa-url" type="text" value="https://velo.vercel.app" placeholder="URL PWA">
+    <button onclick="loadQRCodes()">🔄 Обновить</button>
+  </div>
+
+  <div class="print-btn">
+    <button onclick="window.print()">🖨️ Распечатать все QR</button>
+  </div>
+
+  <div id="grid"></div>
+
+  <div class="footer">
+    Каждый QR уникален. В нём зашита ссылка: https://pwa-url/?bike=42_CAMPUS_BIKE_XX
+  </div>
+
+<script>
+const BACKEND = localStorage.getItem('velo_backend_url') || 'http://localhost:3000';
+
+async function loadQRCodes() {
+  const pwaUrl = document.getElementById('pwa-url').value.replace(/\/+$/, '');
+  const grid = document.getElementById('grid');
+  grid.innerHTML = '<p style="color:#888;">Загрузка...</p>';
+
+  try {
+    const resp = await fetch(BACKEND + '/api/bikes');
+    const data = await resp.json();
+
+    grid.innerHTML = '';
+    for (const bike of data.bikes) {
+      const isFree = bike.status === 'free';
+      const url = pwaUrl + '?bike=' + encodeURIComponent(bike.bike_id);
+
+      const card = document.createElement('div');
+      card.className = 'card ' + (isFree ? 'free' : 'rented');
+
+      card.innerHTML = `
+        <h3>${bike.bike_id}</h3>
+        <div class="status">
+          ${isFree
+            ? '<span class="free">🟢 СВОБОДЕН</span>'
+            : '<span class="rented">🔴 ЗАНЯТ</span>'}
+        </div>
+        ${bike.user ? `<div class="user">👤 ${bike.user}</div>` : ''}
+        <canvas></canvas>
+      `;
+
+      grid.appendChild(card);
+
+      const canvas = card.querySelector('canvas');
+      await QRCode.toCanvas(canvas, url, {
+        width: 150,
+        margin: 2,
+        color: { dark: '#000000', light: '#ffffff' }
+      });
+    }
+  } catch (e) {
+    grid.innerHTML = '<p style="color:#ff6b6b;">❌ Ошибка: ' + e.message + '<br>Бэкенд запущен? ' + BACKEND + '/api/bikes</p>';
+  }
+}
+
+loadQRCodes();
+</script>
+</body>
+</html>
